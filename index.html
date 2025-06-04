@@ -5,41 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM System Tutorial</title>
     <style>
+        /* Universal box-sizing */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        /* Body styling - using Background (Dark) from scheme */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #000000;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E1E; /* Dark slate for contrast or dark mode */
             min-height: 100vh;
-            color: #ffffff;
-            overflow-x: hidden;
+            color: #F9F9F9; /* Light neutral for text on dark background */
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
 
+        /* Main container for content */
         .container {
             max-width: 100vw;
             margin: 0 auto;
             padding: 10px;
         }
 
+        /* Header section styling */
         .header {
             text-align: center;
             padding: 40px 20px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border-radius: 0;
+            background: rgba(255, 255, 255, 0.05); /* Slightly transparent for frosted glass effect */
+            backdrop-filter: blur(10px); /* Frosted glass effect */
+            border-radius: 15px; /* Rounded corners for header */
             margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-left: none;
-            border-right: none;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
         }
 
         .header h1 {
-            color: #ffffff;
-            font-size: clamp(2rem, 6vw, 3.5rem);
+            color: #F9F9F9; /* Light neutral for headings */
+            font-size: clamp(2rem, 6vw, 3.5rem); /* Responsive font size */
             font-weight: 300;
             margin-bottom: 15px;
             text-shadow: none;
@@ -47,22 +49,23 @@
         }
 
         .header p {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(249, 249, 249, 0.7); /* Slightly muted light neutral for secondary text */
             font-size: clamp(1rem, 3vw, 1.3rem);
             font-weight: 300;
             text-transform: uppercase;
             letter-spacing: 0.1em;
         }
 
+        /* Video player container */
         .video-container {
             position: relative;
             width: 100%;
             max-width: 900px;
             margin: 0 auto 40px;
-            border-radius: 0;
+            border-radius: 15px; /* Rounded corners for video container */
             overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-            background: #111111;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); /* Deep shadow */
+            background: #111111; /* Dark background for video area */
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -70,39 +73,61 @@
             width: 100%;
             height: auto;
             display: block;
+            z-index: 1; /* Ensure video content is below overlays that might use z-index */
         }
 
-        .video-overlay {
+        /* Play/Pause overlay button on video */
+        #playPauseOverlay {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            color: white;
-            padding: 20px;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.6); /* Semi-transparent black */
+            color: #F9F9F9; /* Light neutral */
+            font-size: 4rem;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none; /* Allows clicks to pass through when hidden */
+            z-index: 10; /* Ensure it's above the video and other elements */
         }
 
-        .video-container:hover .video-overlay {
-            transform: translateY(0);
+        /* Show overlay when video is paused or container is hovered */
+        .video-container:hover #playPauseOverlay,
+        video:paused + #playPauseOverlay { /* This selector is tricky, JS will handle visibility */
+            opacity: 1;
+            pointer-events: auto;
         }
 
+        /* Hide overlay when video is playing */
+        video:not(:paused) + #playPauseOverlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Removed .video-overlay CSS rules */
+
+        /* Content sections styling */
         .content-section {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.05); /* Slightly lighter background for better text visibility */
             backdrop-filter: blur(10px);
-            border-radius: 0;
+            border-radius: 15px; /* Rounded corners for content sections */
             padding: 40px 30px;
-            margin-bottom: 1px;
-            box-shadow: none;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-left: none;
-            border-right: none;
+            margin-bottom: 20px; /* Increased margin between sections */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Added shadow for depth */
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly stronger border */
             transform: translateY(20px);
             opacity: 0;
             animation: slideUp 0.6s ease forwards;
         }
 
+        /* Animation delays for staggered appearance */
         .content-section:nth-child(even) {
             animation-delay: 0.2s;
         }
@@ -118,8 +143,9 @@
             }
         }
 
+        /* Section title styling */
         .section-title {
-            color: #ffffff;
+            color: #F9F9F9; /* Light neutral for headings */
             font-size: clamp(1.5rem, 4vw, 2.2rem);
             font-weight: 300;
             margin-bottom: 25px;
@@ -129,53 +155,61 @@
             letter-spacing: -0.01em;
         }
 
+        /* Section icon styling - using Primary Accent */
         .section-icon {
-            background: #ffffff;
-            color: #000000;
+            background: #F3AD00; /* Golden yellow */
+            color: #1C1C1C; /* Rich charcoal gray for contrast */
             width: 50px;
             height: 50px;
-            border-radius: 0;
+            border-radius: 50%; /* Circular icon */
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
+        /* Section content text - improved contrast */
         .section-content {
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(249, 249, 249, 0.9); /* Improved contrast for text */
             line-height: 1.8;
             font-size: clamp(1rem, 3vw, 1.1rem);
             font-weight: 300;
         }
 
+        /* Highlight box styling - using Highlight / Callout color */
         .highlight-box {
-            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
-            border-left: 4px solid #38b2ac;
+            background: linear-gradient(135deg, #00698C, #004D6B); /* Deep teal gradient */
+            border-left: 4px solid #00698C; /* Deep teal border */
             padding: 20px;
             border-radius: 12px;
             margin: 20px 0;
+            color: #F9F9F9; /* Light neutral for text on dark teal */
         }
 
+        /* Step list styling */
         .step-list {
             list-style: none;
             padding: 0;
         }
 
         .step-list li {
-            background: rgba(102, 126, 234, 0.1);
+            background: rgba(0, 105, 140, 0.15); /* Transparent Deep Teal */
             margin: 10px 0;
             padding: 15px 20px;
             border-radius: 12px;
             position: relative;
             padding-left: 50px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            color: rgba(249, 249, 249, 0.9); /* Improved contrast for text */
         }
 
         .step-list li:hover {
             transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 105, 140, 0.2);
         }
 
+        /* Step list number icon - using Primary Accent / Muted Accent */
         .step-list li::before {
             content: counter(step-counter);
             counter-increment: step-counter;
@@ -183,8 +217,8 @@
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+            background: linear-gradient(135deg, #F3AD00, #C4A000); /* Golden yellow gradient */
+            color: #1C1C1C; /* Rich charcoal gray for contrast */
             width: 25px;
             height: 25px;
             border-radius: 50%;
@@ -199,6 +233,7 @@
             counter-reset: step-counter;
         }
 
+        /* Benefits grid layout */
         .benefits-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -206,18 +241,19 @@
             margin-top: 20px;
         }
 
+        /* Benefit card styling */
         .benefit-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.03); /* Slightly lighter background */
             padding: 30px 25px;
-            border-radius: 0;
+            border-radius: 15px; /* Rounded corners */
             text-align: center;
             transition: transform 0.3s ease, background 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .benefit-card:hover {
             transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .benefit-icon {
@@ -226,76 +262,113 @@
         }
 
         .benefit-card h4 {
-            color: #ffffff;
+            color: #F9F9F9; /* Light neutral */
             font-weight: 400;
             margin-bottom: 10px;
             font-size: 1.2rem;
         }
 
         .benefit-card p {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(249, 249, 249, 0.8); /* Improved contrast */
             font-weight: 300;
         }
 
+        /* Video controls styling */
         .controls {
             display: flex;
             justify-content: center;
             gap: 15px;
             margin: 20px 0;
             flex-wrap: wrap;
+            position: relative; /* Ensure z-index works relative to content below */
+            z-index: 1; /* Keep controls above general content if any overlap */
         }
 
+        /* Button styling - using Primary Accent / Muted Accent */
         .btn {
-            background: #ffffff;
-            color: #000000;
+            background: linear-gradient(135deg, #F3AD00, #C4A000); /* Golden yellow gradient */
+            color: #1C1C1C; /* Rich charcoal gray for text */
             border: none;
             padding: 15px 30px;
-            border-radius: 0;
+            border-radius: 30px; /* Much rounder buttons */
             cursor: pointer;
-            font-weight: 400;
+            font-weight: 500; /* Slightly bolder text */
             transition: all 0.3s ease;
             font-size: clamp(0.9rem, 3vw, 1rem);
             min-width: 140px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            box-shadow: 0 10px 20px rgba(243, 173, 0, 0.3); /* Button shadow */
         }
 
         .btn:hover {
             transform: translateY(-3px);
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, #C4A000, #F3AD00); /* Reverse gradient on hover */
+            box-shadow: 0 15px 35px rgba(243, 173, 0, 0.4);
         }
 
         .btn:active {
             transform: translateY(0);
+            box-shadow: 0 5px 15px rgba(243, 173, 0, 0.2);
         }
 
+        /* Specific video control buttons - using Primary Accent transparent */
+        .video-control-btn {
+            background: rgba(243, 173, 0, 0.1); /* Transparent golden yellow */
+            color: #F9F9F9; /* Light neutral */
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%; /* Circular buttons */
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-control-btn:hover {
+            background: rgba(243, 173, 0, 0.2); /* More transparent golden yellow on hover */
+            transform: scale(1.05);
+        }
+
+        /* Progress bar styling */
         .progress-bar {
             width: 100%;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 0;
+            height: 5px; /* Thicker progress bar */
+            background: rgba(249, 249, 249, 0.2); /* Transparent light neutral */
+            border-radius: 5px;
             overflow: hidden;
-            margin: 20px 0;
+            margin: 10px 0; /* Adjusted margin */
+            cursor: pointer; /* Make it clickable */
+            z-index: 6; /* Ensure progress bar is above video overlay */
+            position: relative; /* Needed for z-index to work */
         }
 
+        /* Progress fill - using Primary Accent / Muted Accent */
         .progress-fill {
             height: 100%;
-            background: #ffffff;
+            background: linear-gradient(90deg, #F3AD00, #C4A000); /* Golden yellow gradient */
             width: 0%;
-            transition: width 0.3s ease;
-            border-radius: 0;
+            transition: width 0.1s linear; /* Smoother transition */
+            border-radius: 5px;
         }
 
+        /* Timestamp styling */
         .timestamp {
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(249, 249, 249, 0.7); /* Slightly better contrast */
             text-align: center;
             margin: 15px 0;
             font-weight: 300;
             letter-spacing: 0.05em;
+            z-index: 6; /* Ensure timestamp is above video overlay */
+            position: relative; /* Needed for z-index to work */
         }
 
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
                 padding: 5px;
@@ -309,6 +382,7 @@
             .header {
                 padding: 15px;
                 margin-bottom: 15px;
+                border-radius: 0; /* Remove border-radius on small screens for full width */
             }
             
             .benefits-grid {
@@ -324,29 +398,40 @@
                 padding: 10px 20px;
                 min-width: 100px;
             }
+
+            #playPauseOverlay {
+                width: 80px;
+                height: 80px;
+                font-size: 3rem;
+            }
         }
 
+        /* Floating action button (back to top) - using Highlight / Callout */
         .floating-action {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background: #ffffff;
-            color: #000000;
+            background: linear-gradient(135deg, #00698C, #004D6B); /* Deep teal gradient */
+            color: #F9F9F9; /* Light neutral */
             border: none;
             width: 60px;
             height: 60px;
-            border-radius: 0;
+            border-radius: 50%; /* Circular button */
             cursor: pointer;
-            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 105, 140, 0.3);
             transition: all 0.3s ease;
             z-index: 1000;
             font-size: 1.5rem;
             font-weight: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .floating-action:hover {
             transform: scale(1.1);
-            background: rgba(255, 255, 255, 0.9);
+            background: linear-gradient(135deg, #004D6B, #00698C); /* Reverse gradient on hover */
+            box-shadow: 0 20px 45px rgba(0, 105, 140, 0.4);
         }
     </style>
 </head>
@@ -358,22 +443,28 @@
         </div>
 
         <div class="video-container">
-            <video id="mainVideo" controls poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450'%3E%3Crect fill='%23667eea' width='800' height='450'/%3E%3Ctext x='400' y='225' text-anchor='middle' fill='white' font-size='24' font-family='Arial'%3ECRM Tutorial Video%3C/text%3E%3C/svg%3E">
+            <!-- Video element with poster attribute for preview -->
+            <video id="mainVideo" poster="https://placehold.co/900x500/F3AD00/1C1C1C?text=CRM+Tutorial+Video+Preview">
                 <source src="https://video.wixstatic.com/video/a111bc_9ab8c1e7d4d04de9920d112954c777b6/1080p/mp4/file.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            <div class="video-overlay">
-                <h3>Interactive CRM Tutorial</h3>
-                <p>Learn how to build lasting customer relationships</p>
-            </div>
-            <div class="progress-bar">
+            <!-- Play/Pause overlay button -->
+            <div id="playPauseOverlay">▶</div>
+            <!-- Removed .video-overlay div -->
+            <div class="progress-bar" id="progressBar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
             <div class="timestamp" id="timestamp">00:00 / 00:00</div>
+            <div class="controls">
+                <button class="video-control-btn" id="playPauseBtn">▶</button>
+                <button class="video-control-btn" id="prevSectionBtn">⏮</button>
+                <button class="video-control-btn" id="nextSectionBtn">⏭</button>
+            </div>
         </div>
 
         <div class="controls">
-            <button class="btn" onclick="jumpToSection(1)">📋 What is CRM?</button>
+            <!-- Section jump buttons -->
+            <button class="btn" onclick="jumpToSection(0)">📋 What is CRM?</button>
             <button class="btn" onclick="jumpToSection(46)">⚙️ Setup Notion</button>
             <button class="btn" onclick="jumpToSection(94)">🤝 Engage Customers</button>
             <button class="btn" onclick="jumpToSection(125)">📊 Track Everything</button>
@@ -523,9 +614,24 @@
         const video = document.getElementById('mainVideo');
         const progressFill = document.getElementById('progressFill');
         const timestamp = document.getElementById('timestamp');
+        const playPauseBtn = document.getElementById('playPauseBtn'); // Control button below video
+        const prevSectionBtn = document.getElementById('prevSectionBtn');
+        const nextSectionBtn = document.getElementById('nextSectionBtn');
+        const progressBar = document.getElementById('progressBar');
+        const playPauseOverlay = document.getElementById('playPauseOverlay'); // Overlay button on video
 
-        // Update progress bar and timestamp
-        video.addEventListener('timeupdate', function() {
+        // Define video sections with their start times
+        const videoSections = [
+            { name: "What is CRM?", time: 0 },
+            { name: "Setting Up Your Notion CRM", time: 46 },
+            { name: "Customer Engagement Strategy", time: 94 },
+            { name: "Tracking & Follow-up System", time: 125 }
+        ];
+
+        let currentSectionIndex = 0;
+
+        // Function to update progress bar and timestamp
+        function updateVideoProgress() {
             const progress = (video.currentTime / video.duration) * 100;
             progressFill.style.width = progress + '%';
             
@@ -535,13 +641,101 @@
             const totalSec = Math.floor(video.duration % 60);
             
             timestamp.textContent = `${currentMin.toString().padStart(2, '0')}:${currentSec.toString().padStart(2, '0')} / ${totalMin.toString().padStart(2, '0')}:${totalSec.toString().padStart(2, '0')}`;
-        });
+
+            // Update current section index based on video time
+            for (let i = videoSections.length - 1; i >= 0; i--) {
+                if (video.currentTime >= videoSections[i].time) {
+                    currentSectionIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // Event listener for video time update
+        video.addEventListener('timeupdate', updateVideoProgress);
+
+        // Event listener for video metadata loaded (to get duration)
+        video.addEventListener('loadedmetadata', updateVideoProgress);
+
+        // Function to toggle play/pause for all relevant controls
+        function togglePlayPause() {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        }
+
+        // Update play/pause button icons and overlay visibility
+        function updatePlayPauseIcons() {
+            if (video.paused) {
+                playPauseBtn.textContent = '▶'; // Control button
+                playPauseOverlay.textContent = '▶'; // Overlay button
+                playPauseOverlay.style.opacity = '1';
+                playPauseOverlay.style.pointerEvents = 'auto';
+            } else {
+                playPauseBtn.textContent = '⏸'; // Control button
+                playPauseOverlay.textContent = '⏸'; // Overlay button
+                playPauseOverlay.style.opacity = '0';
+                playPauseOverlay.style.pointerEvents = 'none';
+            }
+        }
+
+        // Add click listener to the play/pause button below the video
+        playPauseBtn.addEventListener('click', togglePlayPause);
+
+        // Add click listener to the play/pause overlay button on the video
+        playPauseOverlay.addEventListener('click', togglePlayPause);
+
+        // Add click listener directly to the video element for play/pause toggle
+        // This makes tapping/clicking anywhere on the video toggle play/pause
+        video.addEventListener('click', togglePlayPause);
+
+
+        // Update play/pause button icon when video state changes
+        video.addEventListener('play', updatePlayPauseIcons);
+        video.addEventListener('pause', updatePlayPauseIcons);
+
+        // Initial update when video loads
+        video.addEventListener('loadeddata', updatePlayPauseIcons);
+
 
         // Jump to specific sections (in seconds from the start)
         function jumpToSection(seconds) {
             video.currentTime = seconds;
             video.play();
         }
+
+        // Previous section functionality
+        prevSectionBtn.addEventListener('click', () => {
+            if (currentSectionIndex > 0) {
+                currentSectionIndex--;
+                jumpToSection(videoSections[currentSectionIndex].time);
+            } else {
+                // If at the beginning, restart current section or go to start
+                jumpToSection(0);
+            }
+        });
+
+        // Next section functionality
+        nextSectionBtn.addEventListener('click', () => {
+            if (currentSectionIndex < videoSections.length - 1) {
+                currentSectionIndex++;
+                jumpToSection(videoSections[currentSectionIndex].time);
+            } else {
+                // If at the end, go to the end of the video
+                jumpToSection(video.duration);
+            }
+        });
+
+        // Seek functionality for progress bar
+        progressBar.addEventListener('click', (e) => {
+            const rect = progressBar.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percentage = clickX / rect.width;
+            video.currentTime = video.duration * percentage;
+            video.play(); // Play video after seeking
+        });
 
         // Scroll to top function
         function scrollToTop() {
@@ -551,17 +745,8 @@
             });
         }
 
-        // Add smooth scrolling for mobile
+        // Add smooth scrolling for mobile and intersection observer
         document.addEventListener('DOMContentLoaded', function() {
-            // Auto-play video on mobile tap
-            video.addEventListener('click', function() {
-                if (video.paused) {
-                    video.play();
-                } else {
-                    video.pause();
-                }
-            });
-
             // Intersection observer for animations
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -575,25 +760,44 @@
             document.querySelectorAll('.content-section').forEach(section => {
                 observer.observe(section);
             });
+
+            // Initial update of play/pause icons on load
+            updatePlayPauseIcons();
         });
 
-        // Add touch-friendly interactions
+        // Add touch-friendly interactions for video controls
         let touchStartY = 0;
-        document.addEventListener('touchstart', e => {
+        let touchStartX = 0;
+
+        video.addEventListener('touchstart', e => {
             touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
         });
 
-        document.addEventListener('touchend', e => {
+        video.addEventListener('touchend', e => {
             const touchEndY = e.changedTouches[0].clientY;
-            const diff = touchStartY - touchEndY;
+            const touchEndX = e.changedTouches[0].clientX;
+            const diffY = touchStartY - touchEndY;
+            const diffX = touchStartX - touchEndX;
             
-            // Swipe up to play video
-            if (diff > 50 && video.paused) {
+            // The main click listener on the video now handles tap play/pause.
+            // These swipe gestures are still useful.
+            
+            // Swipe up to play video (if paused)
+            if (diffY > 50 && video.paused) {
                 video.play();
             }
-            // Swipe down to pause video
-            else if (diff < -50 && !video.paused) {
+            // Swipe down to pause video (if playing)
+            else if (diffY < -50 && !video.paused) {
                 video.pause();
+            }
+            // Swipe left for next section
+            else if (diffX > 50) {
+                nextSectionBtn.click(); // Trigger next section button click
+            }
+            // Swipe right for previous section
+            else if (diffX < -50) {
+                prevSectionBtn.click(); // Trigger previous section button click
             }
         });
     </script>
