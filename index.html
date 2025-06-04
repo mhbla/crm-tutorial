@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM System Tutorial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100vw;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border-radius: 0;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: none;
+            border-right: none;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 300;
+            margin-bottom: 15px;
+            text-shadow: none;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 40px;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .video-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .video-container:hover .video-overlay {
+            transform: translateY(0);
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border-radius: 0;
+            padding: 40px 30px;
+            margin-bottom: 1px;
+            box-shadow: none;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-left: none;
+            border-right: none;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.6s ease forwards;
+        }
+
+        .content-section:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+
+        .content-section:nth-child(odd) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .section-title {
+            color: #ffffff;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 300;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            letter-spacing: -0.01em;
+        }
+
+        .section-icon {
+            background: #ffffff;
+            color: #000000;
+            width: 50px;
+            height: 50px;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .section-content {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            font-weight: 300;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+            border-left: 4px solid #38b2ac;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .step-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .step-list li {
+            background: rgba(102, 126, 234, 0.1);
+            margin: 10px 0;
+            padding: 15px 20px;
+            border-radius: 12px;
+            position: relative;
+            padding-left: 50px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .step-list li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            counter-increment: step-counter;
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .step-list {
+            counter-reset: step-counter;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 30px 25px;
+            border-radius: 0;
+            text-align: center;
+            transition: transform 0.3s ease, background 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .benefit-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .benefit-card h4 {
+            color: #ffffff;
+            font-weight: 400;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .benefit-card p {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 0;
+            cursor: pointer;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            min-width: 140px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 0;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ffffff;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 0;
+        }
+
+        .timestamp {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+            
+            .content-section {
+                padding: 20px 15px;
+                margin-bottom: 15px;
+            }
+            
+            .header {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .benefits-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                min-width: 100px;
+            }
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 0;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        .floating-action:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CRM System Mastery</h1>
+            <p>Transform Your Customer Relationships</p>
+        </div>
+
+        <div class="video-container">
+            <video id="mainVideo" controls poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450'%3E%3Crect fill='%23667eea' width='800' height='450'/%3E%3Ctext x='400' y='225' text-anchor='middle' fill='white' font-size='24' font-family='Arial'%3ECRM Tutorial Video%3C/text%3E%3C/svg%3E">
+                <source src="https://video.wixstatic.com/video/a111bc_9ab8c1e7d4d04de9920d112954c777b6/1080p/mp4/file.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="video-overlay">
+                <h3>Interactive CRM Tutorial</h3>
+                <p>Learn how to build lasting customer relationships</p>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="timestamp" id="timestamp">00:00 / 00:00</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="jumpToSection(1)">📋 What is CRM?</button>
+            <button class="btn" onclick="jumpToSection(46)">⚙️ Setup Notion</button>
+            <button class="btn" onclick="jumpToSection(94)">🤝 Engage Customers</button>
+            <button class="btn" onclick="jumpToSection(125)">📊 Track Everything</button>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <div class="section-icon">🎯</div>
+                What is CRM?
+            </div>
+            <div class="section-content">
+                <p><strong>Customer Relationship Management (CRM)</strong> is your secret weapon for business growth. It's the systematic way to catalog every interaction from your ads, posts, and customer touchpoints.</p>
+                
+                <div class="highlight-box">
+                    <strong>Key Insight:</strong> CRM transforms random interactions into meaningful relationships that drive long-term business success.
+                </div>
+                
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">📈</div>
+                        <h4>Track Interactions</h4>
+                        <p>Monitor every like, comment, and follow</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">🎪</div>
+                        <h4>Build Relationships</h4>
+                        <p>Convert followers into loyal customers</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">🚀</div>
+                        <h4>Scale Your Business</h4>
+                        <p>Systematic approach to customer management</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <div class="section-icon">⚙️</div>
+                Setting Up Your Notion CRM
+            </div>
+            <div class="section-content">
+                <p>Think of Notion as "Excel on steroids" - a powerful tool that makes data management intuitive and visually appealing.</p>
+                
+                <ol class="step-list">
+                    <li><strong>Download Notion</strong> or open it in your browser</li>
+                    <li><strong>Access the client portal</strong> and find your duplicate link</li>
+                    <li><strong>Click "Duplicate to your workspace"</strong> to create your personal CRM</li>
+                    <li><strong>Customize labels</strong> according to your industry needs</li>
+                </ol>
+
+                <div class="highlight-box">
+                    <strong>Pro Tip:</strong> The duplicate template is pre-configured for immediate use - no complex setup required!
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <div class="section-icon">🤝</div>
+                Customer Engagement Strategy
+            </div>
+            <div class="section-content">
+                <p>The magic happens in personal, non-robotic interactions. We're not trying to make immediate sales - we're building lasting relationships.</p>
+                
+                <div class="highlight-box">
+                    <strong>Example Approach:</strong> "Hello, thank you for the follow, how is the store going?" - personalized and relevant to their business.
+                </div>
+                
+                <ul class="step-list">
+                    <li><strong>Visit their profile</strong> to understand their business/interests</li>
+                    <li><strong>Send personalized messages</strong> that show genuine interest</li>
+                    <li><strong>Ask relevant questions</strong> based on their industry or content</li>
+                    <li><strong>Focus on relationship building</strong> rather than immediate sales</li>
+                </ul>
+
+                <p><em>"A customer becomes a fan, becomes an advocate for your brand"</em> - this is the ultimate goal of CRM.</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <div class="section-icon">📊</div>
+                Tracking & Follow-up System
+            </div>
+            <div class="section-content">
+                <p>Every interaction must be catalogued for systematic follow-up. This is where most businesses fail - they don't track their engagement.</p>
+                
+                <ol class="step-list">
+                    <li><strong>Record username</strong> of new followers/engagers</li>
+                    <li><strong>Copy conversation link</strong> for easy access</li>
+                    <li><strong>Set status</strong> (New Lead, Engaged, etc.)</li>
+                    <li><strong>Schedule follow-up reminders</strong> (typically 1 week)</li>
+                    <li><strong>Add detailed notes</strong> about their business/interests</li>
+                </ol>
+
+                <div class="highlight-box">
+                    <strong>Critical Success Factor:</strong> Space out interactions naturally - not too pushy, but consistent enough to stay top-of-mind.
+                </div>
+
+                <p>Remember: A customer requires multiple repeated interactions with your content before they purchase. Consistent, tracked follow-up is essential for conversion.</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-title">
+                <div class="section-icon">🎯</div>
+                Key Takeaways
+            </div>
+            <div class="section-content">
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">✅</div>
+                        <h4>Every Interaction Counts</h4>
+                        <p>Track all likes, comments, and follows</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">⏰</div>
+                        <h4>Timing is Everything</h4>
+                        <p>Strategic follow-up scheduling</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">💝</div>
+                        <h4>Relationships Over Sales</h4>
+                        <p>Focus on long-term customer value</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">📈</div>
+                        <h4>Systematic Growth</h4>
+                        <p>Scalable customer management</p>
+                    </div>
+                </div>
+                
+                <div class="highlight-box">
+                    <strong>Your Mission:</strong> Make more relationships, make more people happy with the things you create. CRM is your tool to achieve this at scale.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="floating-action" onclick="scrollToTop()" title="Back to top">
+        ↑
+    </button>
+
+    <script>
+        const video = document.getElementById('mainVideo');
+        const progressFill = document.getElementById('progressFill');
+        const timestamp = document.getElementById('timestamp');
+
+        // Update progress bar and timestamp
+        video.addEventListener('timeupdate', function() {
+            const progress = (video.currentTime / video.duration) * 100;
+            progressFill.style.width = progress + '%';
+            
+            const currentMin = Math.floor(video.currentTime / 60);
+            const currentSec = Math.floor(video.currentTime % 60);
+            const totalMin = Math.floor(video.duration / 60);
+            const totalSec = Math.floor(video.duration % 60);
+            
+            timestamp.textContent = `${currentMin.toString().padStart(2, '0')}:${currentSec.toString().padStart(2, '0')} / ${totalMin.toString().padStart(2, '0')}:${totalSec.toString().padStart(2, '0')}`;
+        });
+
+        // Jump to specific sections (in seconds from the start)
+        function jumpToSection(seconds) {
+            video.currentTime = seconds;
+            video.play();
+        }
+
+        // Scroll to top function
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Add smooth scrolling for mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-play video on mobile tap
+            video.addEventListener('click', function() {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            });
+
+            // Intersection observer for animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.content-section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+
+        // Add touch-friendly interactions
+        let touchStartY = 0;
+        document.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', e => {
+            const touchEndY = e.changedTouches[0].clientY;
+            const diff = touchStartY - touchEndY;
+            
+            // Swipe up to play video
+            if (diff > 50 && video.paused) {
+                video.play();
+            }
+            // Swipe down to pause video
+            else if (diff < -50 && !video.paused) {
+                video.pause();
+            }
+        });
+    </script>
+</body>
+</html>
