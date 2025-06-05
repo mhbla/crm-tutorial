@@ -470,7 +470,7 @@
             <video id="mainVideo" poster="https://placehold.co/900x500/F3AD00/1C1C1C?text=CRM+Tutorial+Video+Preview" playsinline webkit-playsinline>
                 <source src="https://video.wixstatic.com/video/a111bc_9ab8c1e7d4d04de9920d112954c777b6/1080p/mp4/file.mp4" type="video/mp4">
                 <!-- Subtitles Track - This is now disabled as we're handling subtitles manually -->
-                <track label="English" kind="subtitles" srclang="en" src="Timeline%201_Subtitle%201.vtt" default>
+                <!-- <track label="English" kind="subtitles" srclang="en" src="Timeline%201_Subtitle%201.vtt" default> -->
                 Your browser does not support the video tag.
             </video>
             <!-- Play/Pause overlay button -->
@@ -693,16 +693,25 @@
             return cues;
         }
 
-        // Function to fetch and parse the VTT file using content_fetcher
+        // Function to fetch and parse the VTT file
         async function loadSubtitles() {
             try {
-                // Use the contentFetchId to get the file content
-                const vttText = await window.content_fetcher.fetch(
-                    'Timeline%201_Subtitle%201.vtt',
-                    [
-                        { id: 'uploaded:Timeline%201_Subtitle%201.vtt', type: 'text/vtt' }
-                    ]
-                );
+                // Determine the base URL for the repository on GitHub Pages
+                // For a GitHub Pages project page like https://username.github.io/repo-name/
+                // location.origin will be https://username.github.io
+                // location.pathname will be /repo-name/ or /repo-name/index.html
+                // We want the base path for the repo: /repo-name/
+                const repoPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                const baseUrl = window.location.origin + repoPath;
+                const vttUrl = baseUrl + 'Timeline%201_Subtitle%201.vtt';
+
+                console.log("Attempting to fetch subtitles from:", vttUrl); // Log the URL for debugging
+
+                const response = await fetch(vttUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}. URL: ${vttUrl}`);
+                }
+                const vttText = await response.text();
                 parsedSubtitles = parseVTT(vttText);
                 console.log("Subtitles loaded and parsed:", parsedSubtitles);
             } catch (error) {
@@ -837,8 +846,7 @@
             subtitlesBtn.style.opacity = subtitlesEnabled ? '1' : '0.5'; // Update button opacity
             
             // Ensure the native track is disabled
-            // No need to disable this explicitly here, as the track element is commented out.
-            // However, keeping this loop as a safeguard if track element is re-added later.
+            // The native <track> element is commented out in the HTML, so this loop is mostly a safeguard.
             for (let i = 0; i < video.textTracks.length; i++) {
                 video.textTracks[i].mode = 'disabled';
             }
@@ -857,8 +865,6 @@
                 video.textTracks[i].mode = 'disabled';
             }
             // Initialize subtitle button opacity to '1' if default `subtitlesEnabled` is true
-            // or if it was explicitly set to showing in previous version.
-            // Let's ensure it's '1' since we want them on by default as per user request.
             subtitlesBtn.style.opacity = subtitlesEnabled ? '1' : '0.5';
             updateSubtitleDisplay(); // Show initial subtitle if enabled
         });
