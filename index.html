@@ -111,8 +111,6 @@
             pointer-events: none;
         }
 
-        /* Removed .video-overlay CSS rules */
-
         /* Content sections styling */
         .content-section {
             background: rgba(255, 255, 255, 0.05); /* Slightly lighter background for better text visibility */
@@ -446,11 +444,12 @@
             <!-- Video element with poster attribute for preview -->
             <video id="mainVideo" poster="https://placehold.co/900x500/F3AD00/1C1C1C?text=CRM+Tutorial+Video+Preview">
                 <source src="https://video.wixstatic.com/video/a111bc_9ab8c1e7d4d04de9920d112954c777b6/1080p/mp4/file.mp4" type="video/mp4">
+                <!-- Subtitles Track - Using the provided VTT file -->
+                <track label="English" kind="subtitles" srclang="en" src="Timeline%201_Subtitle%201.vtt" default>
                 Your browser does not support the video tag.
             </video>
             <!-- Play/Pause overlay button -->
             <div id="playPauseOverlay">▶</div>
-            <!-- Removed .video-overlay div -->
             <div class="progress-bar" id="progressBar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
@@ -459,6 +458,7 @@
                 <button class="video-control-btn" id="playPauseBtn">▶</button>
                 <button class="video-control-btn" id="prevSectionBtn">⏮</button>
                 <button class="video-control-btn" id="nextSectionBtn">⏭</button>
+                <button class="video-control-btn" id="subtitlesBtn">CC</button>
             </div>
         </div>
 
@@ -619,6 +619,7 @@
         const nextSectionBtn = document.getElementById('nextSectionBtn');
         const progressBar = document.getElementById('progressBar');
         const playPauseOverlay = document.getElementById('playPauseOverlay'); // Overlay button on video
+        const subtitlesBtn = document.getElementById('subtitlesBtn'); // Subtitles button
 
         // Define video sections with their start times
         const videoSections = [
@@ -728,6 +729,57 @@
             }
         });
 
+        // Toggle subtitles functionality
+        subtitlesBtn.addEventListener('click', () => {
+            // Get all text tracks associated with the video
+            const textTracks = video.textTracks;
+
+            // Find the English subtitles track (or the first one available)
+            let englishTrack = null;
+            for (let i = 0; i < textTracks.length; i++) {
+                if (textTracks[i].kind === 'subtitles' && textTracks[i].language === 'en') {
+                    englishTrack = textTracks[i];
+                    break;
+                }
+            }
+
+            if (englishTrack) {
+                // Toggle the mode of the subtitles track
+                if (englishTrack.mode === 'showing') {
+                    englishTrack.mode = 'disabled';
+                    subtitlesBtn.style.opacity = '0.5'; // Visually indicate off
+                } else {
+                    // Disable all other tracks first to ensure only one is showing
+                    for (let i = 0; i < textTracks.length; i++) {
+                        textTracks[i].mode = 'disabled';
+                    }
+                    englishTrack.mode = 'showing';
+                    subtitlesBtn.style.opacity = '1'; // Visually indicate on
+                }
+            } else {
+                console.warn("English subtitles track not found.");
+                // Optionally provide a user message that subtitles are not available.
+            }
+        });
+
+        // Initialize subtitle button opacity based on default state and ensure track is showing
+        video.addEventListener('loadeddata', () => {
+            const textTracks = video.textTracks;
+            let englishTrack = null;
+            for (let i = 0; i < textTracks.length; i++) {
+                if (textTracks[i].kind === 'subtitles' && textTracks[i].language === 'en') {
+                    englishTrack = textTracks[i];
+                    break;
+                }
+            }
+            if (englishTrack) {
+                englishTrack.mode = 'showing'; // Explicitly set to showing
+                subtitlesBtn.style.opacity = '1'; // Visually indicate on
+            } else {
+                subtitlesBtn.style.opacity = '0.5'; // Default to off visually if no track
+            }
+        });
+
         // Seek functionality for progress bar
         progressBar.addEventListener('click', (e) => {
             const rect = progressBar.getBoundingClientRect();
@@ -761,7 +813,7 @@
                 observer.observe(section);
             });
 
-            // Initial update of play/pause icons on load
+            // Initial update of play/pause icons and subtitle button opacity on load
             updatePlayPauseIcons();
         });
 
