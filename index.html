@@ -100,13 +100,38 @@
 
         /* Show overlay when video is paused or container is hovered */
         .video-container:hover #playPauseOverlay,
-        video:paused + #playPauseOverlay { /* This selector is tricky, JS will handle visibility */
+        video:paused + #playPauseOverlay {
             opacity: 1;
             pointer-events: auto;
         }
 
         /* Hide overlay when video is playing */
         video:not(:paused) + #playPauseOverlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Subtitle display area */
+        #subtitleDisplay {
+            position: absolute;
+            bottom: 0; /* Position at the bottom of the video */
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            color: #F9F9F9; /* Light neutral text */
+            padding: 10px 20px;
+            text-align: center;
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            line-height: 1.4;
+            opacity: 1; /* Initially visible, will be toggled */
+            transition: opacity 0.3s ease;
+            z-index: 8; /* Below play/pause overlay, above video */
+            pointer-events: none; /* Do not block clicks on video */
+            box-sizing: border-box; /* Include padding in width */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); /* Add text shadow for readability */
+        }
+
+        #subtitleDisplay.hidden {
             opacity: 0;
             pointer-events: none;
         }
@@ -444,7 +469,7 @@
             <!-- Video element with poster attribute for preview -->
             <video id="mainVideo" poster="https://placehold.co/900x500/F3AD00/1C1C1C?text=CRM+Tutorial+Video+Preview" playsinline webkit-playsinline>
                 <source src="https://video.wixstatic.com/video/a111bc_9ab8c1e7d4d04de9920d112954c777b6/1080p/mp4/file.mp4" type="video/mp4">
-                <!-- Subtitles Track - Using the provided VTT file -->
+                <!-- Subtitles Track - This is now disabled as we're handling subtitles manually -->
                 <track label="English" kind="subtitles" srclang="en" src="Timeline%201_Subtitle%201.vtt" default>
                 Your browser does not support the video tag.
             </video>
@@ -460,6 +485,8 @@
                 <button class="video-control-btn" id="nextSectionBtn">⏭</button>
                 <button class="video-control-btn" id="subtitlesBtn">CC</button>
             </div>
+            <!-- Custom subtitle display area -->
+            <div id="subtitleDisplay"></div>
         </div>
 
         <div class="controls">
@@ -620,6 +647,7 @@
         const progressBar = document.getElementById('progressBar');
         const playPauseOverlay = document.getElementById('playPauseOverlay'); // Overlay button on video
         const subtitlesBtn = document.getElementById('subtitlesBtn'); // Subtitles button
+        const subtitleDisplay = document.getElementById('subtitleDisplay'); // Custom subtitle display element
 
         // Define video sections with their start times
         const videoSections = [
@@ -630,6 +658,77 @@
         ];
 
         let currentSectionIndex = 0;
+        let subtitlesEnabled = true; // State to track if subtitles are enabled
+        let parsedSubtitles = []; // Array to hold parsed subtitle cues
+
+        // Function to parse VTT content
+        function parseVTT(vttText) {
+            const cues = [];
+            // Split by cue blocks, handle different newline characters
+            const cueBlocks = vttText.split(/\r?\n\r?\n/).filter(block => block.trim() !== '' && block.trim() !== 'WEBVTT');
+
+            cueBlocks.forEach(block => {
+                const lines = block.trim().split(/\r?\n/);
+                if (lines.length >= 2) {
+                    const timeString = lines[1]; // e.g., "00:00:01.333 --> 00:00:03.791"
+                    const textLines = lines.slice(2);
+                    const text = textLines.join(' ').replace(/<\/?[^>]+(>|$)/g, ""); // Remove HTML tags from subtitle text
+
+                    // Convert time string to seconds
+                    const parseTime = (s) => {
+                        const parts = s.split(':');
+                        const seconds = parseFloat(parts.pop());
+                        const minutes = parseInt(parts.pop() || '0');
+                        const hours = parseInt(parts.pop() || '0');
+                        return hours * 3600 + minutes * 60 + seconds;
+                    };
+
+                    const [startTimeStr, endTimeStr] = timeString.split(' --> ').map(s => s.trim());
+                    const startTime = parseTime(startTimeStr);
+                    const endTime = parseTime(endTimeStr);
+
+                    cues.push({ startTime, endTime, text });
+                }
+            });
+            return cues;
+        }
+
+        // Function to fetch and parse the VTT file using content_fetcher
+        async function loadSubtitles() {
+            try {
+                // Use the contentFetchId to get the file content
+                const vttText = await window.content_fetcher.fetch(
+                    'Timeline%201_Subtitle%201.vtt',
+                    [
+                        { id: 'uploaded:Timeline%201_Subtitle%201.vtt', type: 'text/vtt' }
+                    ]
+                );
+                parsedSubtitles = parseVTT(vttText);
+                console.log("Subtitles loaded and parsed:", parsedSubtitles);
+            } catch (error) {
+                console.error("Error loading subtitles:", error);
+            }
+        }
+
+        // Function to update current subtitle text
+        function updateSubtitleDisplay() {
+            if (!subtitlesEnabled) {
+                subtitleDisplay.textContent = ''; // Clear text if subtitles are off
+                return;
+            }
+
+            const currentTime = video.currentTime;
+            let currentSubtitle = '';
+
+            for (const cue of parsedSubtitles) {
+                if (currentTime >= cue.startTime && currentTime < cue.endTime) {
+                    currentSubtitle = cue.text;
+                    break;
+                }
+            }
+            subtitleDisplay.textContent = currentSubtitle;
+        }
+
 
         // Function to update progress bar and timestamp
         function updateVideoProgress() {
@@ -650,6 +749,8 @@
                     break;
                 }
             }
+            
+            updateSubtitleDisplay(); // Call subtitle update on timeupdate
         }
 
         // Event listener for video time update
@@ -729,56 +830,39 @@
             }
         });
 
-        // Toggle subtitles functionality
+        // Toggle custom subtitles functionality
         subtitlesBtn.addEventListener('click', () => {
-            // Get all text tracks associated with the video
-            const textTracks = video.textTracks;
-
-            // Find the English subtitles track (or the first one available)
-            let englishTrack = null;
-            for (let i = 0; i < textTracks.length; i++) {
-                if (textTracks[i].kind === 'subtitles' && textTracks[i].language === 'en') {
-                    englishTrack = textTracks[i];
-                    break;
-                }
+            subtitlesEnabled = !subtitlesEnabled; // Toggle state
+            subtitleDisplay.classList.toggle('hidden', !subtitlesEnabled); // Toggle CSS class
+            subtitlesBtn.style.opacity = subtitlesEnabled ? '1' : '0.5'; // Update button opacity
+            
+            // Ensure the native track is disabled
+            // No need to disable this explicitly here, as the track element is commented out.
+            // However, keeping this loop as a safeguard if track element is re-added later.
+            for (let i = 0; i < video.textTracks.length; i++) {
+                video.textTracks[i].mode = 'disabled';
             }
 
-            if (englishTrack) {
-                // Toggle the mode of the subtitles track
-                if (englishTrack.mode === 'showing') {
-                    englishTrack.mode = 'disabled';
-                    subtitlesBtn.style.opacity = '0.5'; // Visually indicate off
-                } else {
-                    // Disable all other tracks first to ensure only one is showing
-                    for (let i = 0; i < textTracks.length; i++) {
-                        textTracks[i].mode = 'disabled';
-                    }
-                    englishTrack.mode = 'showing';
-                    subtitlesBtn.style.opacity = '1'; // Visually indicate on
-                }
+            // If subtitles are enabled, update immediately
+            if (subtitlesEnabled) {
+                updateSubtitleDisplay();
             } else {
-                console.warn("English subtitles track not found.");
-                // Optionally provide a user message that subtitles are not available.
+                subtitleDisplay.textContent = ''; // Clear text if disabled
             }
         });
 
-        // Initialize subtitle button opacity based on default state and ensure track is showing
+        // Ensure native subtitle track is disabled on load, as we're using custom display
         video.addEventListener('loadeddata', () => {
-            const textTracks = video.textTracks;
-            let englishTrack = null;
-            for (let i = 0; i < textTracks.length; i++) {
-                if (textTracks[i].kind === 'subtitles' && textTracks[i].language === 'en') {
-                    englishTrack = textTracks[i];
-                    break;
-                }
+            for (let i = 0; i < video.textTracks.length; i++) {
+                video.textTracks[i].mode = 'disabled';
             }
-            if (englishTrack) {
-                englishTrack.mode = 'showing'; // Explicitly set to showing
-                subtitlesBtn.style.opacity = '1'; // Visually indicate on
-            } else {
-                subtitlesBtn.style.opacity = '0.5'; // Default to off visually if no track
-            }
+            // Initialize subtitle button opacity to '1' if default `subtitlesEnabled` is true
+            // or if it was explicitly set to showing in previous version.
+            // Let's ensure it's '1' since we want them on by default as per user request.
+            subtitlesBtn.style.opacity = subtitlesEnabled ? '1' : '0.5';
+            updateSubtitleDisplay(); // Show initial subtitle if enabled
         });
+
 
         // Seek functionality for progress bar
         progressBar.addEventListener('click', (e) => {
@@ -815,6 +899,7 @@
 
             // Initial update of play/pause icons and subtitle button opacity on load
             updatePlayPauseIcons();
+            loadSubtitles(); // Load VTT data when DOM is ready
         });
 
         // Add touch-friendly interactions for video controls
